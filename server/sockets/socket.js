@@ -21,6 +21,9 @@ io.on('connection', (client) => {
 		let people = users.addUser(client.id, name, room);
 
 		client.broadcast.to(room).emit('listUsers', users.getUsersByRoom(room));
+		client.broadcast.to(room).emit('sendMessage', createMessage(
+			'Admin', `${name} ha ingresado al chat`
+		));
 
 		callback(people);
 	});
@@ -35,13 +38,13 @@ io.on('connection', (client) => {
 
 	});
 
-	client.on('sendMessage', (data) => {
+	client.on('sendMessage', (data, callback) => {
 		let user = users.getUserById(client.id);
 		let message = createMessage(user.name, data.message);
 
-		console.log('Mensage de ', user.name, ':', message.message);
-
 		client.broadcast.to(user.room).emit('sendMessage', message);
+
+		callback(message);
 	})
 
 	client.on('directMessage', (data) => {
